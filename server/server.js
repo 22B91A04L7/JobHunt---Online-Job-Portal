@@ -21,11 +21,15 @@ await connectCloudinary();
 
 // Middleware to parse JSON bodies
 app.use(cors({
-  origin: ['https://online-job-portal-client.vercel.app', 'http://localhost:5173'],
+  origin: ['https://online-job-portal-client.vercel.app', 'http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(express.json());
 app.use(clerkMiddleware());
 
