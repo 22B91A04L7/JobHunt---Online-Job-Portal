@@ -13,11 +13,22 @@ import {clerkMiddleware} from '@clerk/express';
 // Initialize the Express application
 const app = express();
 
-// Connect to MongoDB
-await connectDB();
-// connect to Cloudinary
-await connectCloudinary();
+// Database connection flag
+let isConnected = false;
 
+// Initialize connections
+async function initializeConnections() {
+  if (!isConnected) {
+    await connectDB();
+    await connectCloudinary();
+    isConnected = true;
+  }
+}
+
+// Connect on startup (for local development)
+if (process.env.NODE_ENV !== 'production') {
+  initializeConnections();
+}
 
 // Middleware to parse JSON bodies
 app.use(cors({
@@ -53,11 +64,13 @@ app.use('/api/users', userRoutes)
 
 
 Sentry.setupExpressErrorHandler(app);
+
+// For local development only
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
 export default app;
-
-// Port configuration
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
