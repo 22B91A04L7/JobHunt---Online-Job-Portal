@@ -13,34 +13,14 @@ import {clerkMiddleware} from '@clerk/express';
 // Initialize the Express application
 const app = express();
 
-// Database connection flag
-let isConnected = false;
+// Connect to MongoDB
+await connectDB();
+// connect to Cloudinary
+await connectCloudinary();
 
-// Initialize connections
-async function initializeConnections() {
-  if (!isConnected) {
-    await connectDB();
-    await connectCloudinary();
-    isConnected = true;
-  }
-}
-
-// Connect on startup (for local development)
-if (process.env.NODE_ENV !== 'production') {
-  initializeConnections();
-}
 
 // Middleware to parse JSON bodies
-app.use(cors({
-  origin: ['https://online-job-portal-client.vercel.app', 'http://localhost:5173', 'http://localhost:5174'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
-
-// Handle preflight requests
-app.options('*', cors());
-
+app.use(cors());
 app.use(express.json());
 app.use(clerkMiddleware());
 
@@ -64,13 +44,11 @@ app.use('/api/users', userRoutes)
 
 
 Sentry.setupExpressErrorHandler(app);
-
-// For local development only
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
-
 export default app;
+
+// Port configuration
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
